@@ -1,0 +1,22 @@
+APP_ENV: dev
+LOG_DIR_NAME: logs
+
+# Whisper Model Configuration
+whisper_settings:
+  MODEL_NAME: "checkpoints/whisper/whisper-tiny_onnx"  # Should match the checkpoint folder name
+  SAMPLING_RATE: 16000
+  DEVICE: "cpu"  # Options: cuda, cpu
+  BATCH_SIZE: 8
+
+# SAM (Segment Anything Model) Configuration
+sam_settings:
+  MODEL_NAME: "sam2.1_hiera_tiny"  # Should match the checkpoint folder name
+  CHECKPOINT_DIR_NAME: "checkpoints/sam"
+  CONFIG_DIR_NAME: "configs"
+  COLOR_MAP: "Set3"  # Matplotlib colormap name
+  DEVICE: "cpu"  # Options: cuda, cpu
+
+# Triton Server Configuration
+triton_settings:
+  TRITON_MAX_BATCH_SIZE: 8
+  TRITON_MAX_QUEUE_DELAY_MICROSECONDS: 1000000  # 1 second in microseconds

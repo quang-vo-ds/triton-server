@@ -1,0 +1,21 @@
+services:
+  triton-server:
+    build: .
+    ports:
+      - "8000:8000" # HTTP inference
+      - "8001:8001" # gRPC inference
+      - "8002:8002" # Metrics
+    volumes:
+      - ./checkpoints:/app/checkpoints
+    environment:
+      - PYTRITON_TRITON_CONFIG_HTTP_PORT=8000
+      - PYTRITON_TRITON_CONFIG_METRICS_PORT=8002
+      - PYTRITON_TRITON_CONFIG_GRPC_PORT=8001
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "localhost:8000/v2/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 6s

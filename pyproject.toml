@@ -1,0 +1,64 @@
+[project]
+# Project metadata. Available keys are documented at:
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata
+
+name = "triton-server"
+description = "Triton Server"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+authors = [{ name = "Quang Vo", email = "vovanquangnbk@gmail.com" }]
+dependencies = [
+    "click>=8.2.1",
+    "huggingface-hub[hf-transfer]>=0.34.4",
+    "librosa>=0.11.0",
+    "matplotlib>=3.10.6",
+    "nvidia-pytriton>=0.7.0",
+    "onnx>=1.19.0",
+    "onnxruntime>=1.23.1",
+    "opencv-python>=4.11.0.86",
+    "optimum[onnx]>=2.0.0",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "sam-2",
+    "torch>=2.8.0",
+    "torchaudio>=2.8.0",
+    "torchvision>=0.23.0",
+    "transformers>=4.55.2",
+]
+dynamic = ["version"]
+
+
+[tool.pyink]
+# Format py files following Google style-guide
+line-length = 80
+unstable = true
+pyink-indentation = 2
+pyink-use-majority-quotes = true
+pyink-annotation-pragmas = [
+  "noqa",
+  "pylint:",
+  "type: ignore",
+  "pytype:",
+  "mypy:",
+  "pyright:",
+  "pyre-",
+]
+
+[build-system]
+# Build system specify which backend is used to build/install the project (flit,
+# poetry, setuptools,...). All backends are supported by `pip install`
+requires = ["flit_core >=3.8,<4"]
+build-backend = "flit_core.buildapi"
+
+
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "auto"
+
+[tool.uv.sources]
+sam-2 = { git = "https://github.com/facebookresearch/sam2.git" }
+
