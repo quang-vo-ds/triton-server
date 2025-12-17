@@ -13,7 +13,7 @@ RESULT_FILE = "data/result.jpg"
 
 
 def test_owlv2_model():
-    model = Owlv2(device="cpu")
+    model = Owlv2()
 
     image_arr = cv2.cvtColor(cv2.imread(IMAGE_FILE), cv2.COLOR_BGR2RGB)
 

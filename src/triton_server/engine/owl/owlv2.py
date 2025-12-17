@@ -1,20 +1,16 @@
 import torch
 from transformers import Owlv2Processor, Owlv2ForObjectDetection
-from PIL import Image
 import numpy as np
 
 from .base import BaseOwl
+from ...configs import settings
 
 
 class Owlv2(BaseOwl):
-    def __init__(self, device="cpu"):
+    def __init__(self, model_name: str = settings.owl_settings.MODEL_NAME, device: str = settings.owl_settings.DEVICE):
         self.device = device
-        self.processor = Owlv2Processor.from_pretrained(
-            "checkpoints/owlv2/owlv2-base-patch16"
-        )
-        self.model = Owlv2ForObjectDetection.from_pretrained(
-            "checkpoints/owlv2/owlv2-base-patch16"
-        ).to(device)
+        self.processor = Owlv2Processor.from_pretrained(model_name)
+        self.model = Owlv2ForObjectDetection.from_pretrained(model_name).to(device)
 
     def detect(
         self, image_arr: np.ndarray, prompts: list[str], score_thresh: float = 0.3

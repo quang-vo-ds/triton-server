@@ -27,6 +27,13 @@ class WhisperModel(BaseModel):
     BATCH_SIZE: int = Field(default=8)
 
 
+class OwlModel(BaseModel):
+    """Owl model settings."""
+
+    MODEL_NAME: str = Field(default="")
+    DEVICE: str = Field(default="")
+
+
 class SAMModel(BaseModel):
     """SAM model settings."""
 
@@ -64,9 +71,11 @@ class AppSettings(BaseSettings):
 
     # Environment
     APP_ENV: Environment = Field(default=Environment.DEVELOPMENT)
+    HF_TOKEN: str = Field(default="")
     LOG_DIR_NAME: str = Field(default="logs")
 
     # Models
     whisper_settings: WhisperModel = Field(default=WhisperModel())
+    owl_settings: OwlModel = Field(default=OwlModel())
     sam_settings: SAMModel = Field(default=SAMModel())
     triton_settings: TritonModel = Field(default=TritonModel())
