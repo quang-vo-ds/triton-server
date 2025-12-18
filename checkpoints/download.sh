@@ -29,8 +29,16 @@ get_yaml_section_value() {
         $0 ~ "^"section":" { in_section=1; next }
         in_section && /^[a-zA-Z_]+:/ && $0 !~ "^[[:space:]]" { in_section=0 }
         in_section && $0 ~ "^[[:space:]]+"key":" {
-            gsub(/.*:[[:space:]]*"?/, "")
-            gsub(/".*/, "")
+            # Remove everything before the value (key: )
+            sub(/^[^:]+:[[:space:]]*/, "")
+            # Remove inline comments (but not # inside quotes)
+            if (match($0, /^"[^"]*"/)) {
+                # Quoted value - extract just the quoted part
+                $0 = substr($0, 2, RLENGTH-2)
+            } else {
+                # Unquoted value - remove comments
+                sub(/[[:space:]]*#.*/, "")
+            }
             print
             exit
         }
@@ -88,7 +96,7 @@ if needs_onnx_export "$WHISPER_MODEL"; then
     WHISPER_BASE=$(get_base_model "$WHISPER_MODEL")
     echo "Downloading $WHISPER_BASE and exporting to ONNX..."
     HF_HUB_ENABLE_HF_TRANSFER=1 hf download "openai/$WHISPER_BASE" --local-dir "whisper/$WHISPER_BASE" || { echo "Failed to download Whisper"; exit 1; }
-    ./export_onnx.sh "openai/$WHISPER_BASE" "whisper/$WHISPER_MODEL" whisper || { echo "Failed to export Whisper to ONNX"; exit 1; }
+    bash ./export_onnx.sh "openai/$WHISPER_BASE" "whisper/$WHISPER_MODEL" whisper || { echo "Failed to export Whisper to ONNX"; exit 1; }
 else
     echo "Downloading $WHISPER_MODEL..."
     HF_HUB_ENABLE_HF_TRANSFER=1 hf download "openai/$WHISPER_MODEL" --local-dir "whisper/$WHISPER_MODEL" || { echo "Failed to download Whisper"; exit 1; }

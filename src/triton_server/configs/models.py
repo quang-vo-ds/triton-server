@@ -49,6 +49,14 @@ class SAMModel(BaseModel):
     DEVICE: str = Field(default="")
 
 
+class PaddleModel(BaseModel):
+    """PaddleOCR model settings."""
+
+    DET_MODEL_NAME: str = Field(default="")
+    REC_MODEL_NAME: str = Field(default="")
+    DEVICE: str = Field(default="")
+
+
 class TritonModel(BaseModel):
     """Triton model settings."""
 
@@ -78,4 +86,5 @@ class AppSettings(BaseSettings):
     whisper_settings: WhisperModel = Field(default=WhisperModel())
     owl_settings: OwlModel = Field(default=OwlModel())
     sam_settings: SAMModel = Field(default=SAMModel())
+    paddle_settings: PaddleModel = Field(default=PaddleModel())
     triton_settings: TritonModel = Field(default=TritonModel())
