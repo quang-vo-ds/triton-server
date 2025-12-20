@@ -8,33 +8,32 @@ MODEL_NAME=${1:-"openai/whisper-tiny"}
 OUTPUT_DIR=${2:-"onnx_out"}
 MODEL_TYPE=${3:-"default"}
 
-# Model-specific configurations
-export_whisper() {
-    optimum-cli export onnx --model "$MODEL_NAME" \
-        "$OUTPUT_DIR" --no-post-process \
-        --output_names encoder_model.onnx decoder_model.onnx \
-        --opset 17
-}
-
-export_default() {
-    optimum-cli export onnx --model "$MODEL_NAME" \
-        "$OUTPUT_DIR" --opset 17
-}
-
-# Add more model types here as functions
-# export_bert() { ... }
-# export_llama() { ... }
-
 echo "Exporting $MODEL_NAME to $OUTPUT_DIR (type: $MODEL_TYPE)..."
 
-case "$MODEL_TYPE" in
-    whisper)
-        export_whisper
-        ;;
-    *)
-        export_default
-        ;;
-esac
+# Use Python API for ONNX export since optimum 2.0 removed CLI export
+python3 -c "
+from transformers import AutoConfig
+from optimum.onnxruntime import ORTModelForSpeechSeq2Seq
+import os
+
+model_name = '$MODEL_NAME'
+output_dir = '$OUTPUT_DIR'
+model_type = '$MODEL_TYPE'
+
+os.makedirs(output_dir, exist_ok=True)
+
+if model_type == 'whisper':
+    # Export Whisper model to ONNX
+    model = ORTModelForSpeechSeq2Seq.from_pretrained(model_name, export=True)
+    model.save_pretrained(output_dir)
+else:
+    # Generic export - try auto detection
+    from optimum.onnxruntime import ORTModel
+    model = ORTModel.from_pretrained(model_name, export=True)
+    model.save_pretrained(output_dir)
+
+print(f'Successfully exported {model_name} to {output_dir}')
+"
 
 echo "✓ Export complete!"
 

@@ -4,8 +4,8 @@ import time
 from pytriton.client import ModelClient
 
 AUDIO_FILE = "data/audio.wav"
-SERVER_URL = "http://localhost:8000/"
-MODEL_NAME = "whisper-tiny_onnx"
+SERVER_URL = "http://localhost:8000"
+MODEL_NAME = "whisper-base_onnx"
 MODEL_VERSION = "1"
 
 INIT_TIMEOUT_S = 300.0

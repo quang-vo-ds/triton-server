@@ -9,12 +9,13 @@ from pytriton.decorators import batch
 from pytriton.model_config import DynamicBatcher, ModelConfig, Tensor
 from pytriton.triton import Triton, TritonConfig
 
-from .engine import WhisperONNX, SAMEngine
+from .engine import WhisperONNX, Owlv2, PaddleOCR
 from .configs import settings
 
 logger = logging.getLogger(__name__)
 whisper_engine = WhisperONNX()
-sam_engine = SAMEngine()
+owl_engine = Owlv2()
+paddle_engine = PaddleOCR()
 
 
 @batch
@@ -33,12 +34,17 @@ def _whisper_infer_func(audio_arr: np.ndarray) -> dict:
 
 
 @batch
-def _sam_infer_func(image_arr: np.ndarray) -> dict:
-    predictions = sam_engine.predict(image_arr)
+def _owl_infer_func(image_arr: np.ndarray, prompts: np.ndarray) -> dict:
+    prompts_decoded = np.array([[p.decode("utf-8") for p in batch] for batch in prompts])
+    detections = owl_engine.detect(image_arr, prompts_decoded)
+    results = [np.array([[str(v) for v in det] for det in dets]) for dets in detections]
+    return {"detections": np.char.encode(results, "utf-8")}
 
-    logger.info(f"Number of predictions: {len(predictions)}")
 
-    return {"images": predictions}
+@batch
+def _paddle_infer_func(image_arr: np.ndarray) -> dict:
+    results = paddle_engine.recognize(image_arr)
+    return {"text": np.char.encode(results, "utf-8")}
 
 
 def main():
@@ -63,13 +69,14 @@ def main():
         logger.info("Serving Whisper Inference")
 
         triton.bind(
-            model_name=Path(settings.sam_settings.MODEL_NAME).name,
-            infer_func=_sam_infer_func,
+            model_name=Path(settings.owl_settings.MODEL_NAME).name,
+            infer_func=_owl_infer_func,
             inputs=[
                 Tensor(name="image_arr", dtype=np.uint8, shape=(-1, -1, 3)),
+                Tensor(name="prompts", dtype=bytes, shape=(-1,)),
             ],
             outputs=[
-                Tensor(name="images", dtype=np.uint8, shape=(-1, -1, 3)),
+                Tensor(name="detections", dtype=bytes, shape=(-1, 6)),
             ],
             config=ModelConfig(
                 max_batch_size=settings.triton_settings.TRITON_MAX_BATCH_SIZE,
@@ -79,7 +86,26 @@ def main():
             ),
             strict=True,
         )
-        logger.info("Serving SAM Inference")
+        logger.info("Serving OWL Inference")
+
+        triton.bind(
+            model_name=Path(settings.paddle_settings.DET_MODEL_NAME).parent.name,
+            infer_func=_paddle_infer_func,
+            inputs=[
+                Tensor(name="image_arr", dtype=np.uint8, shape=(-1, -1, 3)),
+            ],
+            outputs=[
+                Tensor(name="text", dtype=bytes, shape=(1,)),
+            ],
+            config=ModelConfig(
+                max_batch_size=settings.triton_settings.TRITON_MAX_BATCH_SIZE,
+                batcher=DynamicBatcher(
+                    max_queue_delay_microseconds=settings.triton_settings.TRITON_MAX_QUEUE_DELAY_MICROSECONDS
+                ),
+            ),
+            strict=True,
+        )
+        logger.info("Serving PaddleOCR Inference")
 
         triton.serve()
 

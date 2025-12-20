@@ -1,4 +1,5 @@
 from .whisper import WhisperTorch, WhisperONNX
-from .sam import SAMEngine
+from .owl import Owlv2
+from .paddle import PaddleOCR
 
-__all__ = ["WhisperTorch", "WhisperONNX", "SAMEngine"]
+__all__ = ["WhisperTorch", "WhisperONNX", "Owlv2", "PaddleOCR"]

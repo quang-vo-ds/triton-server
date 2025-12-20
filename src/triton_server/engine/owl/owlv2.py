@@ -13,16 +13,25 @@ class Owlv2(BaseOwl):
         self.model = Owlv2ForObjectDetection.from_pretrained(model_name).to(device)
 
     def detect(
-        self, image_arr: np.ndarray, prompts: list[str], score_thresh: float = 0.3
+        self,
+        image_arr: np.ndarray,
+        prompts: np.ndarray,
+        score_thresh: float = 0.3,
+        max_detections: int | None = None,
     ) -> np.ndarray:
         # Handle single image case by adding batch dimension
         if len(image_arr.shape) == 3:
             image_arr = np.expand_dims(image_arr, axis=0)
+        if len(prompts.shape) == 1:
+            prompts = np.expand_dims(prompts, axis=0)
 
-        text_labels = [prompts] * image_arr.shape[0]
+        assert prompts.shape[0] == image_arr.shape[0], \
+            f"Prompts batch size ({prompts.shape[0]}) must match image batch size ({image_arr.shape[0]})"
+
+        prompts_list = prompts.tolist()
 
         inputs = self.processor(
-            text=text_labels, images=image_arr, return_tensors="pt", padding=True
+            text=prompts_list, images=image_arr, return_tensors="pt", padding=True
         )
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
@@ -35,19 +44,31 @@ class Owlv2(BaseOwl):
             outputs=outputs,
             target_sizes=target_sizes,
             threshold=score_thresh,
-            text_labels=text_labels,
+            text_labels=prompts_list,
         )
 
         batch_dets = []
-        for res in results:
+        for idx, res in enumerate(results):
             boxes = res["boxes"].cpu().numpy()
             scores = res["scores"].cpu().numpy()
+            labels = res["labels"]
+            image_prompts = prompts_list[idx]
 
             dets = []
-            for (x1, y1, x2, y2), s in zip(boxes, scores):
-                if s >= score_thresh:
-                    dets.append((float(x1), float(y1), float(x2), float(y2), float(s)))
+            for (x1, y1, x2, y2), label, score in zip(boxes, labels, scores):
+                if score >= score_thresh:
+                    label_idx = label.item()
+                    label = image_prompts[label_idx]
+                    dets.append([float(x1), float(y1), float(x2), float(y2), label, float(score)])
 
             batch_dets.append(dets)
 
-        return batch_dets
+        # Determine max_detections: use min of provided value and actual max across batch
+        actual_max = max(len(dets) for dets in batch_dets) if batch_dets else 0
+        max_detections = min(max_detections, actual_max) if max_detections is not None else actual_max
+
+        # Pad/truncate detections to max_detections
+        empty_det = [0.0, 0.0, 0.0, 0.0, "", 0.0]
+        batch_dets = [(dets + [empty_det] * max_detections)[:max_detections] for dets in batch_dets]
+
+        return np.array(batch_dets, dtype=object)

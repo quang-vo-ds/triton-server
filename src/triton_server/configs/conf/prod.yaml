@@ -3,31 +3,31 @@ LOG_DIR_NAME: logs
 
 # Whisper Model Configuration
 whisper_settings:
-  MODEL_NAME: "checkpoints/whisper/whisper-base_onnx"  # Options: whisper-tiny, whisper-base, whisper-small, whisper-medium, whisper-large
+  MODEL_NAME: "checkpoints/whisper/whisper-base_onnx" # Options: whisper-tiny, whisper-base, whisper-small, whisper-medium, whisper-large
   SAMPLING_RATE: 16000
-  DEVICE: "cuda"  # Options: cuda, cpu
+  DEVICE: "cuda" # Options: cuda, cpu
   BATCH_SIZE: 8
 
 # OWL (Open-World Localization) Model Configuration
 owl_settings:
   MODEL_NAME: "checkpoints/owlv2/owlv2-base-patch16"
-  DEVICE: "cuda"  # Options: cuda, cpu
+  DEVICE: "cuda" # Options: cuda, cpu
 
 # SAM (Segment Anything Model) Configuration
 sam_settings:
-  MODEL_NAME: "sam2.1_hiera_tiny"  # Should match the checkpoint filename without .pt extension
+  MODEL_NAME: "sam2.1_hiera_tiny" # Should match the checkpoint filename without .pt extension
   CHECKPOINT_DIR_NAME: "checkpoints"
   CONFIG_DIR_NAME: "configs"
-  COLOR_MAP: "Set3"  # Matplotlib colormap name
-  DEVICE: "cuda"  # Options: cuda, cpu
+  COLOR_MAP: "Set3" # Matplotlib colormap name
+  DEVICE: "cuda" # Options: cuda, cpu
 
 # PaddleOCR Configuration
 paddle_settings:
-  DET_MODEL_NAME: "checkpoints/paddle-ocr/PP-OCRv5_server_det"
-  REC_MODEL_NAME: "checkpoints/paddle-ocr/PP-OCRv5_server_rec"
-  DEVICE: "cuda"  # Options: cuda, cpu
+  DET_MODEL_NAME: "checkpoints/paddle-ocr/en_PP-OCRv3_det_infer"
+  REC_MODEL_NAME: "checkpoints/paddle-ocr/en_PP-OCRv4_rec_infer"
+  DEVICE: "cuda" # Options: cuda, cpu
 
 # Triton Server Configuration
 triton_settings:
   TRITON_MAX_BATCH_SIZE: 8
-  TRITON_MAX_QUEUE_DELAY_MICROSECONDS: 1000000  # 1 second in microseconds
+  TRITON_MAX_QUEUE_DELAY_MICROSECONDS: 1000000 # 1 second in microseconds

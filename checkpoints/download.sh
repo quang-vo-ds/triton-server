@@ -83,15 +83,15 @@ else
     exit 1
 fi
 
-# Create directories
-mkdir -p sam whisper owlv2 paddle-ocr
 
 # Download SAM
-echo "Downloading $SAM_MODEL..."
-SAM_URL="https://dl.fbaipublicfiles.com/segment_anything_2/092824/${SAM_MODEL}.pt"
-$DOWNLOAD_CMD "sam/${SAM_MODEL}.pt" "$SAM_URL" || { echo "Failed to download SAM"; exit 1; }
+# mkdir -p sam
+# echo "Downloading $SAM_MODEL..."
+# SAM_URL="https://dl.fbaipublicfiles.com/segment_anything_2/092824/${SAM_MODEL}.pt"
+# $DOWNLOAD_CMD "sam/${SAM_MODEL}.pt" "$SAM_URL" || { echo "Failed to download SAM"; exit 1; }
 
 # Download Whisper
+mkdir -p whisper
 if needs_onnx_export "$WHISPER_MODEL"; then
     WHISPER_BASE=$(get_base_model "$WHISPER_MODEL")
     echo "Downloading $WHISPER_BASE and exporting to ONNX..."
@@ -104,11 +104,21 @@ fi
 
 # Download OWLv2
 echo "Downloading $OWL_MODEL..."
+mkdir -p owlv2
 HF_HUB_ENABLE_HF_TRANSFER=1 hf download "google/$OWL_MODEL" --local-dir "owlv2/$OWL_MODEL" || { echo "Failed to download OWLv2"; exit 1; }
 
-# Download PaddleOCR
+# Download PaddleOCR (official models compatible with PaddlePaddle 2.x)
 echo "Downloading $PADDLE_DET_MODEL and $PADDLE_REC_MODEL..."
-HF_HUB_ENABLE_HF_TRANSFER=1 hf download "PaddlePaddle/$PADDLE_DET_MODEL" --local-dir "paddle-ocr/$PADDLE_DET_MODEL" || { echo "Failed to download $PADDLE_DET_MODEL"; exit 1; }
-HF_HUB_ENABLE_HF_TRANSFER=1 hf download "PaddlePaddle/$PADDLE_REC_MODEL" --local-dir "paddle-ocr/$PADDLE_REC_MODEL" || { echo "Failed to download $PADDLE_REC_MODEL"; exit 1; }
+mkdir -p paddle-ocr
+
+# Download and extract detection model
+PADDLE_DET_URL="https://paddleocr.bj.bcebos.com/PP-OCRv3/english/${PADDLE_DET_MODEL}.tar"
+$DOWNLOAD_CMD "paddle-ocr/${PADDLE_DET_MODEL}.tar" "$PADDLE_DET_URL" || { echo "Failed to download $PADDLE_DET_MODEL"; exit 1; }
+tar -xf "paddle-ocr/${PADDLE_DET_MODEL}.tar" -C paddle-ocr/ && rm "paddle-ocr/${PADDLE_DET_MODEL}.tar"
+
+# Download and extract recognition model
+PADDLE_REC_URL="https://paddleocr.bj.bcebos.com/PP-OCRv4/english/${PADDLE_REC_MODEL}.tar"
+$DOWNLOAD_CMD "paddle-ocr/${PADDLE_REC_MODEL}.tar" "$PADDLE_REC_URL" || { echo "Failed to download $PADDLE_REC_MODEL"; exit 1; }
+tar -xf "paddle-ocr/${PADDLE_REC_MODEL}.tar" -C paddle-ocr/ && rm "paddle-ocr/${PADDLE_REC_MODEL}.tar"
 
 echo "Download complete for $APP_ENV environment."
