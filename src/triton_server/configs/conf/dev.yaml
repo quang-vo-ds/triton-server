@@ -5,13 +5,13 @@ LOG_DIR_NAME: logs
 whisper_settings:
   MODEL_NAME: "checkpoints/whisper/whisper-tiny_onnx" # Should match the checkpoint folder name
   SAMPLING_RATE: 16000
-  DEVICE: "cpu" # Options: cuda, cpu
+  DEVICE: "cuda" # Options: cuda, cpu
   BATCH_SIZE: 8
 
 # OWL (Open-World Localization) Model Configuration
 owl_settings:
   MODEL_NAME: "checkpoints/owlv2/owlv2-base-patch16"
-  DEVICE: "cpu" # Options: cuda, cpu
+  DEVICE: "cuda" # Options: cuda, cpu
 
 # SAM (Segment Anything Model) Configuration
 sam_settings:
@@ -19,13 +19,13 @@ sam_settings:
   CHECKPOINT_DIR_NAME: "checkpoints/sam"
   CONFIG_DIR_NAME: "configs"
   COLOR_MAP: "Set3" # Matplotlib colormap name
-  DEVICE: "cpu" # Options: cuda, cpu
+  DEVICE: "cuda" # Options: cuda, cpu
 
 # PaddleOCR Configuration
 paddle_settings:
   DET_MODEL_NAME: "checkpoints/paddle-ocr/en_PP-OCRv3_det_infer"
   REC_MODEL_NAME: "checkpoints/paddle-ocr/en_PP-OCRv4_rec_infer"
-  DEVICE: "cpu" # Options: cuda, cpu
+  DEVICE: "cuda" # Options: cuda, cpu
 
 # Triton Server Configuration
 triton_settings:

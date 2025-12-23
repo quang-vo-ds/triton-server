@@ -97,6 +97,11 @@ if needs_onnx_export "$WHISPER_MODEL"; then
     echo "Downloading $WHISPER_BASE and exporting to ONNX..."
     HF_HUB_ENABLE_HF_TRANSFER=1 hf download "openai/$WHISPER_BASE" --local-dir "whisper/$WHISPER_BASE" || { echo "Failed to download Whisper"; exit 1; }
     bash ./export_onnx.sh "openai/$WHISPER_BASE" "whisper/$WHISPER_MODEL" whisper || { echo "Failed to export Whisper to ONNX"; exit 1; }
+    # Copy processor/tokenizer files needed by WhisperProcessor
+    echo "Copying processor and tokenizer files to ONNX directory..."
+    for f in preprocessor_config.json tokenizer.json tokenizer_config.json vocab.json merges.txt special_tokens_map.json normalizer.json added_tokens.json; do
+        [ -f "whisper/$WHISPER_BASE/$f" ] && cp "whisper/$WHISPER_BASE/$f" "whisper/$WHISPER_MODEL/"
+    done
 else
     echo "Downloading $WHISPER_MODEL..."
     HF_HUB_ENABLE_HF_TRANSFER=1 hf download "openai/$WHISPER_MODEL" --local-dir "whisper/$WHISPER_MODEL" || { echo "Failed to download Whisper"; exit 1; }
