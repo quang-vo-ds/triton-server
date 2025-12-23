@@ -98,6 +98,7 @@ echo ""
 echo "[5/5] Downloading model checkpoints..."
 
 if [ -f "checkpoints/download.sh" ]; then
+    source .venv/bin/activate
     bash checkpoints/download.sh
     echo "Checkpoints downloaded successfully"
 else
