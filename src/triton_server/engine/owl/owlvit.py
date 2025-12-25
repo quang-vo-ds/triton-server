@@ -1,26 +1,26 @@
 import torch
-from transformers import Owlv2Processor, Owlv2ForObjectDetection
+from transformers import OwlViTProcessor, OwlViTForObjectDetection
 import numpy as np
 
 from .base import BaseOwl
 from ...configs import settings
 
 
-class Owlv2(BaseOwl):
+class OwlViT(BaseOwl):
     def __init__(
         self,
         model_name: str = settings.owl_settings.MODEL_NAME,
         device: str = settings.owl_settings.DEVICE,
     ):
         self.device = device
-        self.processor = Owlv2Processor.from_pretrained(model_name)
-        self.model = Owlv2ForObjectDetection.from_pretrained(model_name).to(device)
+        self.processor = OwlViTProcessor.from_pretrained(model_name)
+        self.model = OwlViTForObjectDetection.from_pretrained(model_name).to(device)
 
     def detect(
         self,
         image_arr: np.ndarray,
         prompts: np.ndarray,
-        score_thresh: float = 0.3,
+        score_thresh: float = 0.001,
         max_detections: int | None = None,
     ) -> np.ndarray:
         # Handle single image case by adding batch dimension
@@ -43,26 +43,25 @@ class Owlv2(BaseOwl):
         with torch.no_grad():
             outputs = self.model(**inputs)
 
-        target_sizes = [(image.shape[0], image.shape[1]) for image in image_arr]
-
-        results = self.processor.post_process_grounded_object_detection(
+        target_sizes = torch.tensor(
+            [(image.shape[0], image.shape[1]) for image in image_arr]
+        )
+        results = self.processor.post_process_object_detection(
             outputs=outputs,
             target_sizes=target_sizes,
             threshold=score_thresh,
-            text_labels=prompts_list,
         )
 
         batch_dets = []
         for idx, res in enumerate(results):
             boxes = res["boxes"].cpu().numpy()
             scores = res["scores"].cpu().numpy()
-            labels = res["labels"]
+            labels = res["labels"].cpu().numpy()
             image_prompts = prompts_list[idx]
 
             dets = []
-            for (x1, y1, x2, y2), label, score in zip(boxes, labels, scores):
+            for (x1, y1, x2, y2), label_idx, score in zip(boxes, labels, scores):
                 if score >= score_thresh:
-                    label_idx = label.item()
                     label = image_prompts[label_idx]
                     dets.append(
                         [

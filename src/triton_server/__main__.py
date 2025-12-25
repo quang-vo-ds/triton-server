@@ -9,12 +9,12 @@ from pytriton.decorators import batch
 from pytriton.model_config import DynamicBatcher, ModelConfig, Tensor
 from pytriton.triton import Triton, TritonConfig
 
-from .engine import WhisperONNX, Owlv2, PaddleOCR, JinaClip
+from .engine import WhisperONNX, OwlViT, PaddleOCR, JinaClip
 from .configs import settings
 
 logger = logging.getLogger(__name__)
 whisper_engine = WhisperONNX()
-owl_engine = Owlv2()
+owl_engine = OwlViT()
 paddle_engine = PaddleOCR()
 jina_clip_engine = JinaClip()
 
@@ -36,7 +36,9 @@ def _whisper_infer_func(audio_arr: np.ndarray) -> dict:
 
 @batch
 def _owl_infer_func(image_arr: np.ndarray, prompts: np.ndarray) -> dict:
-    prompts_decoded = np.array([[p.decode("utf-8") for p in batch] for batch in prompts])
+    prompts_decoded = np.array(
+        [[p.decode("utf-8") for p in batch] for batch in prompts]
+    )
     detections = owl_engine.detect(image_arr, prompts_decoded)
     results = [np.array([[str(v) for v in det] for det in dets]) for dets in detections]
     return {"detections": np.char.encode(results, "utf-8")}

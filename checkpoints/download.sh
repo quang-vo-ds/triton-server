@@ -109,10 +109,10 @@ else
     HF_HUB_ENABLE_HF_TRANSFER=1 hf download "openai/$WHISPER_MODEL" --local-dir "whisper/$WHISPER_MODEL" || { echo "Failed to download Whisper"; exit 1; }
 fi
 
-# Download OWLv2
+# Download OWL models
 echo "Downloading $OWL_MODEL..."
-mkdir -p owlv2
-HF_HUB_ENABLE_HF_TRANSFER=1 hf download "google/$OWL_MODEL" --local-dir "owlv2/$OWL_MODEL" || { echo "Failed to download OWLv2"; exit 1; }
+mkdir -p owl
+HF_HUB_ENABLE_HF_TRANSFER=1 hf download "google/$OWL_MODEL" --local-dir "owl/$OWL_MODEL" || { echo "Failed to download OWL"; exit 1; }
 
 # Download PaddleOCR (official models compatible with PaddlePaddle 2.x)
 echo "Downloading $PADDLE_DET_MODEL and $PADDLE_REC_MODEL..."

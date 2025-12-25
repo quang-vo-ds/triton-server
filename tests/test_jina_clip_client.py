@@ -5,7 +5,7 @@ from pytriton.client import ModelClient
 
 IMAGE_FILE = "data/image.jpg"
 SERVER_URL = "http://localhost:8000"
-MODEL_NAME = "jina-clip-v2"
+MODEL_NAME = "jina-clip-v1"
 
 INIT_TIMEOUT_S = 300.0
 INFERENCE_TIMEOUT_S = 300.0

@@ -10,7 +10,7 @@ whisper_settings:
 
 # OWL (Open-World Localization) Model Configuration
 owl_settings:
-  MODEL_NAME: "checkpoints/owlv2/owlv2-base-patch16"
+  MODEL_NAME: "checkpoints/owl/owlvit-base-patch32"
   DEVICE: "cuda" # Options: cuda, cpu
 
 # SAM (Segment Anything Model) Configuration
@@ -29,7 +29,7 @@ paddle_settings:
 
 # Jina CLIP Configuration
 jina_clip_settings:
-  MODEL_NAME: "checkpoints/jina-clip/jina-clip-v2"
+  MODEL_NAME: "checkpoints/jina-clip/jina-clip-v1"
   DEVICE: "cuda" # Options: cuda, cpu
 
 # Triton Server Configuration

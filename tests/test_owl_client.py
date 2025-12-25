@@ -5,7 +5,7 @@ from pytriton.client import ModelClient
 
 IMAGE_FILE = "data/image.jpg"
 SERVER_URL = "http://localhost:8000"
-MODEL_NAME = "owlv2-base-patch16"
+MODEL_NAME = "owlvit-base-patch32"
 
 INIT_TIMEOUT_S = 300.0
 INFERENCE_TIMEOUT_S = 300.0
