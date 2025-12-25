@@ -4,6 +4,10 @@
   "python.terminal.activateEnvInCurrentTerminal": true,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "python.formatting.provider": "black",
-  "python.sortImports.onSave": true
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  }
 }

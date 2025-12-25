@@ -9,13 +9,14 @@ from pytriton.decorators import batch
 from pytriton.model_config import DynamicBatcher, ModelConfig, Tensor
 from pytriton.triton import Triton, TritonConfig
 
-from .engine import WhisperONNX, Owlv2, PaddleOCR
+from .engine import WhisperONNX, Owlv2, PaddleOCR, JinaClip
 from .configs import settings
 
 logger = logging.getLogger(__name__)
 whisper_engine = WhisperONNX()
 owl_engine = Owlv2()
 paddle_engine = PaddleOCR()
+jina_clip_engine = JinaClip()
 
 
 @batch
@@ -45,6 +46,19 @@ def _owl_infer_func(image_arr: np.ndarray, prompts: np.ndarray) -> dict:
 def _paddle_infer_func(image_arr: np.ndarray) -> dict:
     results = paddle_engine.recognize(image_arr)
     return {"text": np.char.encode(results, "utf-8")}
+
+
+@batch
+def _jina_clip_text_infer_func(texts: np.ndarray) -> dict:
+    texts_decoded = np.array([t.decode("utf-8") for t in texts.flatten()])
+    embeddings = jina_clip_engine.encode_text(texts_decoded)
+    return {"embeddings": embeddings}
+
+
+@batch
+def _jina_clip_image_infer_func(image_arr: np.ndarray) -> dict:
+    embeddings = jina_clip_engine.encode_image(image_arr)
+    return {"embeddings": embeddings}
 
 
 def main():
@@ -106,6 +120,44 @@ def main():
             strict=True,
         )
         logger.info("Serving PaddleOCR Inference")
+
+        triton.bind(
+            model_name=f"{Path(settings.jina_clip_settings.MODEL_NAME).name}-text",
+            infer_func=_jina_clip_text_infer_func,
+            inputs=[
+                Tensor(name="texts", dtype=bytes, shape=(1,)),
+            ],
+            outputs=[
+                Tensor(name="embeddings", dtype=np.float32, shape=(-1,)),
+            ],
+            config=ModelConfig(
+                max_batch_size=settings.triton_settings.TRITON_MAX_BATCH_SIZE,
+                batcher=DynamicBatcher(
+                    max_queue_delay_microseconds=settings.triton_settings.TRITON_MAX_QUEUE_DELAY_MICROSECONDS
+                ),
+            ),
+            strict=True,
+        )
+        logger.info("Serving Jina CLIP Text Inference")
+
+        triton.bind(
+            model_name=f"{Path(settings.jina_clip_settings.MODEL_NAME).name}-image",
+            infer_func=_jina_clip_image_infer_func,
+            inputs=[
+                Tensor(name="image_arr", dtype=np.uint8, shape=(-1, -1, 3)),
+            ],
+            outputs=[
+                Tensor(name="embeddings", dtype=np.float32, shape=(-1,)),
+            ],
+            config=ModelConfig(
+                max_batch_size=settings.triton_settings.TRITON_MAX_BATCH_SIZE,
+                batcher=DynamicBatcher(
+                    max_queue_delay_microseconds=settings.triton_settings.TRITON_MAX_QUEUE_DELAY_MICROSECONDS
+                ),
+            ),
+            strict=True,
+        )
+        logger.info("Serving Jina CLIP Image Inference")
 
         triton.serve()
 

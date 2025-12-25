@@ -56,12 +56,14 @@ SAM_MODEL=$(get_yaml_section_value "sam_settings" "MODEL_NAME")
 OWL_MODEL=$(extract_model_name "$(get_yaml_section_value "owl_settings" "MODEL_NAME")")
 PADDLE_DET_MODEL=$(extract_model_name "$(get_yaml_section_value "paddle_settings" "DET_MODEL_NAME")")
 PADDLE_REC_MODEL=$(extract_model_name "$(get_yaml_section_value "paddle_settings" "REC_MODEL_NAME")")
+JINA_CLIP_MODEL=$(extract_model_name "$(get_yaml_section_value "jina_clip_settings" "MODEL_NAME")")
 
 echo "Models to download:"
 echo "  Whisper: $WHISPER_MODEL"
 echo "  SAM: $SAM_MODEL"
 echo "  OWL: $OWL_MODEL"
 echo "  PaddleOCR: $PADDLE_DET_MODEL, $PADDLE_REC_MODEL"
+echo "  Jina CLIP: $JINA_CLIP_MODEL"
 
 # Helper function to check if model needs ONNX export
 needs_onnx_export() {
@@ -125,5 +127,10 @@ tar -xf "paddle-ocr/${PADDLE_DET_MODEL}.tar" -C paddle-ocr/ && rm "paddle-ocr/${
 PADDLE_REC_URL="https://paddleocr.bj.bcebos.com/PP-OCRv4/english/${PADDLE_REC_MODEL}.tar"
 $DOWNLOAD_CMD "paddle-ocr/${PADDLE_REC_MODEL}.tar" "$PADDLE_REC_URL" || { echo "Failed to download $PADDLE_REC_MODEL"; exit 1; }
 tar -xf "paddle-ocr/${PADDLE_REC_MODEL}.tar" -C paddle-ocr/ && rm "paddle-ocr/${PADDLE_REC_MODEL}.tar"
+
+# Download Jina CLIP
+echo "Downloading $JINA_CLIP_MODEL..."
+mkdir -p jina-clip
+HF_HUB_ENABLE_HF_TRANSFER=1 hf download "jinaai/$JINA_CLIP_MODEL" --local-dir "jina-clip/$JINA_CLIP_MODEL" || { echo "Failed to download Jina CLIP"; exit 1; }
 
 echo "Download complete for $APP_ENV environment."

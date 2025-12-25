@@ -57,6 +57,13 @@ class PaddleModel(BaseModel):
     DEVICE: str = Field(default="")
 
 
+class JinaClipModel(BaseModel):
+    """Jina CLIP model settings."""
+
+    MODEL_NAME: str = Field(default="")
+    DEVICE: str = Field(default="")
+
+
 class TritonModel(BaseModel):
     """Triton model settings."""
 
@@ -87,4 +94,5 @@ class AppSettings(BaseSettings):
     owl_settings: OwlModel = Field(default=OwlModel())
     sam_settings: SAMModel = Field(default=SAMModel())
     paddle_settings: PaddleModel = Field(default=PaddleModel())
+    jina_clip_settings: JinaClipModel = Field(default=JinaClipModel())
     triton_settings: TritonModel = Field(default=TritonModel())

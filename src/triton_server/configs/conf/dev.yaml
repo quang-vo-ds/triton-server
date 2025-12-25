@@ -27,6 +27,11 @@ paddle_settings:
   REC_MODEL_NAME: "checkpoints/paddle-ocr/en_PP-OCRv4_rec_infer"
   DEVICE: "cuda" # Options: cuda, cpu
 
+# Jina CLIP Configuration
+jina_clip_settings:
+  MODEL_NAME: "checkpoints/jina-clip/jina-clip-v2"
+  DEVICE: "cuda" # Options: cuda, cpu
+
 # Triton Server Configuration
 triton_settings:
   TRITON_MAX_BATCH_SIZE: 8
